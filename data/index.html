@@ -32,14 +32,15 @@
       </div>
       <div class="card">
         <p class="card-title">ACCELEROMETER</p>
-        <p><span class="reading">X: <span id="accX"></span> ms<sup>2</sup></span></p>
-        <p><span class="reading">Y: <span id="accY"></span> ms<sup>2</sup></span></p>
-        <p><span class="reading">Z: <span id="accZ"></span> ms<sup>2</sup></span></p>
+        <p><span class="reading">X: <span id="accX"></span> g</sup></span></p>
+        <p><span class="reading">Y: <span id="accY"></span> g</sup></span></p>
+        <p><span class="reading">Z: <span id="accZ"></span> g</sup></span></p>
       </div>
       <div class="card">
-        <p class="card-title">TEMPERATURE</p>
-        <p><span class="reading"><span id="temp"></span> &deg;C</span></p>
-        <p class="card-title">3D ANIMATION</p>
+        <p class="card-title">KALMAN</p>
+        <p><span class="reading">Kal Pitch: <span id="kalPitch"></span> !@</span></p>
+        <p><span class="reading">Kal Roll: <span id="kalRoll"></span> !@</span></p>
+        <p class="card-title"> Calibrate </p>
         <button id="reset" onclick="resetPosition(this)">RESET POSITION</button>
         <button id="resetX" onclick="resetPosition(this)">X</button>
         <button id="resetY" onclick="resetPosition(this)">Y</button>

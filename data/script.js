@@ -84,16 +84,19 @@ if (!!window.EventSource) {
     document.getElementById("gyroY").innerHTML = obj.gyroY;
     document.getElementById("gyroZ").innerHTML = obj.gyroZ;
 
-    // Change cube rotation after receiving the readinds
+    //Change cube rotation after receiving the readinds
     cube.rotation.x = obj.gyroY;
     cube.rotation.z = obj.gyroX;
     cube.rotation.y = obj.gyroZ;
     renderer.render(scene, camera);
   }, false);
 
-  source.addEventListener('temperature_reading', function(e) {
-    console.log("temperature_reading", e.data);
-    document.getElementById("temp").innerHTML = e.data;
+  source.addEventListener('kalman_readings', function(e) {
+    //console.log("kal_readings", e.data);
+    var obj = JSON.parse(e.data);
+    document.getElementById("kalPitch").innerHTML = obj.kalPitch;
+    document.getElementById("kalRoll").innerHTML = obj.kalRoll;
+
   }, false);
 
   source.addEventListener('accelerometer_readings', function(e) {

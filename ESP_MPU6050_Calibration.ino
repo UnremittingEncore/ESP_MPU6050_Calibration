@@ -16,7 +16,21 @@
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <Arduino_JSON.h>
+#include <KalmanFilter.h>
 #include "SPIFFS.h"
+
+//------ Kalman Filter ------------
+
+KalmanFilter kalmanX(0.001, 0.003, 0.03);
+KalmanFilter kalmanY(0.001, 0.003, 0.03);
+
+float accPitch = 0;
+float accRoll = 0;
+
+float kalPitch = 0;
+float kalRoll = 0;
+
+//----------------------------------
 
 // Replace with your network credentials
 const char* ssid = "MyNetwork";
@@ -33,10 +47,10 @@ JSONVar readings;
 
 // Timer variables
 unsigned long lastTime = 0;  
-unsigned long lastTimeTemperature = 0;
+unsigned long lastTimeKal = 0;
 unsigned long lastTimeAcc = 0;
 unsigned long gyroDelay = 10;
-unsigned long temperatureDelay = 1000;
+unsigned long kalmanDelay = 1000;
 unsigned long accelerometerDelay = 200;
 
 // Create a sensor object
@@ -115,23 +129,58 @@ String getGyroReadings(){
 
 String getAccReadings() {
   mpu.getEvent(&a, &g, &temp);
-  // Get current acceleration values
-  accX = a.acceleration.x;
-  accY = a.acceleration.y;
-  accZ = a.acceleration.z;
+  // Get current acceleration values in g-force units
+  accX = a.acceleration.x/9.8;
+  accY = a.acceleration.y/9.8;
+  accZ = a.acceleration.z/9.8;
   readings["accX"] = String(accX);
   readings["accY"] = String(accY);
   readings["accZ"] = String(accZ);
   String accString = JSON.stringify (readings);
   return accString;
 }
+//------ Kalman Filter ------------
 
-String getTemperature(){
+String getKalReadings() {
+  
   mpu.getEvent(&a, &g, &temp);
-  temperature = temp.temperature;
-  return String(temperature);
+  
+  // Get current acceleration values  
+  accX = a.acceleration.x;
+  accY = a.acceleration.y;
+  accZ = a.acceleration.z;
+  
+  // Gyro readings
+  float gyroX_temp = g.gyro.x;
+  if(abs(gyroX_temp) > gyroXerror)  {
+    gyroX += gyroX_temp/100.00;
+  }
+  
+  float gyroY_temp = g.gyro.y;
+  if(abs(gyroY_temp) > gyroYerror) {
+    gyroY += gyroY_temp/70.00;
+  }
+
+  float gyroZ_temp = g.gyro.z;
+  if(abs(gyroZ_temp) > gyroZerror) {
+    gyroZ += gyroZ_temp/90.00;
+  }
+  
+  // Calculate Pitch & Roll from accelerometer (deg)
+  accPitch = -(atan2(accX, sqrt(accY*accY + accZ*accZ))*180.0)/M_PI;
+  accRoll  = (atan2(accY, accZ)*180.0)/M_PI;
+
+  // Kalman filter
+  kalPitch = kalmanY.update(accPitch, gyroY);
+  kalRoll = kalmanX.update(accRoll, gyroX);
+
+  readings["kalPitch"] = String(kalPitch);
+  readings["kalRoll"] = String(kalRoll);
+  String kalString = JSON.stringify (readings);
+  return kalString;
 }
 
+//----------------------------------
 void setup() {
   Serial.begin(115200);
 //  Wire.begin(21, 22, 100000);
@@ -193,9 +242,9 @@ void loop() {
     events.send(getAccReadings().c_str(),"accelerometer_readings",millis());
     lastTimeAcc = millis();
   }
-  if ((millis() - lastTimeTemperature) > temperatureDelay) {
+  if ((millis() - lastTimeKal) > kalmanDelay) {
     // Send Events to the Web Server with the Sensor Readings
-    events.send(getTemperature().c_str(),"temperature_reading",millis());
-    lastTimeTemperature = millis();
+    events.send(getKalReadings().c_str(),"kalman_readings",millis());
+    lastTimeKal = millis();
   }
 }
