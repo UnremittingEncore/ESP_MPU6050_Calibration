@@ -31,7 +31,7 @@ function init3D(){
   const geometry = new THREE.BoxGeometry(5, 1, 4);
 
   // Materials of each face
-  var cubeMaterials = [
+  var cubeMaterials1 = [
     new THREE.MeshBasicMaterial({color:0x008080}),
     new THREE.MeshBasicMaterial({color:0x008080}),
     new THREE.MeshBasicMaterial({color:0x008080}),
@@ -39,8 +39,16 @@ function init3D(){
     new THREE.MeshBasicMaterial({color:0x008080}),
     new THREE.MeshBasicMaterial({color:0x008080}),
   ];
+  var cubeMaterials2 = [
+    new THREE.MeshBasicMaterial({color:0x5e6dcc}),
+    new THREE.MeshBasicMaterial({color:0x5e6dcc}),
+    new THREE.MeshBasicMaterial({color:0x5e6dcc}),
+    new THREE.MeshBasicMaterial({color:0x5e6dcc}),
+    new THREE.MeshBasicMaterial({color:0x5e6dcc}),
+    new THREE.MeshBasicMaterial({color:0x5e6dcc}),
+  ];
 
-  const material = new THREE.MeshFaceMaterial(cubeMaterials);
+  const material = new THREE.MeshFaceMaterial(cubeMaterials1);
 
   cube = new THREE.Mesh(geometry, material);
   scene.add(cube);
@@ -86,8 +94,8 @@ if (!!window.EventSource) {
 
     //Change cube rotation after receiving the readings
     // cube.rotation.x = obj.gyroY;
-    // cube.rotation.z = obj.gyroX;
     // cube.rotation.y = obj.gyroZ;
+    // cube.rotation.z = obj.gyroX;
     // renderer.render(scene, camera);
   }, false);
 
@@ -99,9 +107,6 @@ if (!!window.EventSource) {
     document.getElementById("kalYaw").innerHTML = obj.kalYaw;
 
     //Change cube rotation after receiving the readings
-    // cube.rotation.x = obj.kalPitch;
-    // cube.rotation.y = obj.kalRoll;
-    // cube.rotation.z = obj.kalYaw;
     cube.rotation.x = obj.kalRoll;
     cube.rotation.y = obj.kalYaw;
     cube.rotation.z = obj.kalPitch;

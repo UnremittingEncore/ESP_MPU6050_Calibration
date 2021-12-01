@@ -35,7 +35,8 @@ float kalRoll = 0;
 float kalYaw = 0;
 
 float M_P1 = 3.141592; // Also defined in math.h 
-const float alpha = 0.6;
+const float alpha = 0.5;
+const float multiplier = 0.0001;
 //----------------------------------
 
 // Replace with your network credentials
@@ -55,9 +56,9 @@ JSONVar readings;
 unsigned long lastTime = 0;  
 unsigned long lastTimeKal = 0;
 unsigned long lastTimeAcc = 0;
-unsigned long gyroDelay = 80;
-unsigned long kalmanDelay = 80;
-unsigned long accelerometerDelay = 80;
+unsigned long gyroDelay = 50;
+unsigned long kalmanDelay = 50;
+unsigned long accelerometerDelay = 50;
 
 // Create a sensor object
 Adafruit_MPU6050 mpu;
@@ -69,7 +70,7 @@ float accX, accY, accZ;
 float temperature;
 
 //Gyroscope sensor deviation
-float gyroXerror = 0.05;
+float gyroXerror = 0.07;
 float gyroYerror = 0.03;
 float gyroZerror = 0.01;
 
@@ -112,7 +113,7 @@ String getGyroReadings(){
 
   float gyroX_temp = g.gyro.x;
   if(abs(gyroX_temp) > gyroXerror)  {
-    gyroX += gyroX_temp/100.00;
+    gyroX += gyroX_temp/50.00;
   }
   
   float gyroY_temp = g.gyro.y;
@@ -124,7 +125,7 @@ String getGyroReadings(){
   if(abs(gyroZ_temp) > gyroZerror) {
     gyroZ += gyroZ_temp/90.00;
   }
-
+   
   readings["gyroX"] = String(gyroX);
   readings["gyroY"] = String(gyroY);
   readings["gyroZ"] = String(gyroZ);
@@ -174,16 +175,13 @@ String getKalReadings() {
   
   // Calculate Pitch, Roll and Yaw from accelerometer (deg)
   accPitch = (atan2(accX, sqrt(accY*accY + accZ*accZ))*180.0)/M_P1;
-  accRoll  = (atan2(accY, sqrt(accX*accX + accZ*accZ))*180.0)/M_P1;
-  accYaw  = (atan2(sqrt(accX*accX + accZ*accZ), accZ)*180.0)/M_P1;
+  accRoll  = (atan2(accY, accZ)*180.0)/M_P1;
+  accYaw  = (atan2(accZ, sqrt(accX*accX + accZ*accZ))*180.0)/M_P1;
 
   // Kalman filter
-//  kalPitch = kalmanY.update(accPitch/1634, gyroY);
-//  kalRoll = kalmanX.update(accRoll/1634, gyroX);
-//  kalYaw = kalmanZ.update(accYaw/1634, gyroZ);
-  kalPitch = accPitch*gyroZ;
-  kalRoll = accY*gyroY;
-  kalYaw = accYaw*gyroZ/(2.0);
+  kalPitch = (1-0.8)*gyroX-accPitch*multiplier;
+  kalRoll = (1-multiplier)*gyroY-accRoll*multiplier;
+  kalYaw = (1-multiplier)*gyroZ-accYaw*multiplier;
   
   readings["kalPitch"] = String(kalPitch);
   readings["kalRoll"] = String(kalRoll);
@@ -210,21 +208,6 @@ void setup() {
   server.on("/reset", HTTP_GET, [](AsyncWebServerRequest *request){
     gyroX=0;
     gyroY=0;
-    gyroZ=0;
-    request->send(200, "text/plain", "OK");
-  });
-
-  server.on("/resetX", HTTP_GET, [](AsyncWebServerRequest *request){
-    gyroX=0;
-    request->send(200, "text/plain", "OK");
-  });
-
-  server.on("/resetY", HTTP_GET, [](AsyncWebServerRequest *request){
-    gyroY=0;
-    request->send(200, "text/plain", "OK");
-  });
-
-  server.on("/resetZ", HTTP_GET, [](AsyncWebServerRequest *request){
     gyroZ=0;
     request->send(200, "text/plain", "OK");
   });
