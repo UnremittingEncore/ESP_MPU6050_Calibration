@@ -38,7 +38,7 @@ body {
   font-weight: bold;
 }
 .cards {
-  max-width: 1000px;
+  max-width: auto;
   color:lightcyan;
   margin: 0 auto;
   display: grid; grid-gap: 2rem;
@@ -49,21 +49,22 @@ body {
   font-size: 1.2rem;
 }
 .cube-content{
-  width: 90%;
+  width: 95%;
   background-color: black;
   height: 300px; margin: auto;
   padding-top:2%;
   color: aqua;
 }
 #reset{
+  margin-top: 50px;
   border: none;
   color: teal;
   font-family: Courier New;
   background-color: lightcyan;
-  padding: 10px;
+  padding: auto;
   text-align: center;
   display: inline-block;
-  font-size: 14px; width: 150px;
+  font-size: 20px; width: auto;
   border-radius: 4px;
 }
 #resetX, #resetY, #resetZ{
@@ -71,11 +72,11 @@ body {
   color: teal;
   font-family: Courier New;
   background-color: lightcyan;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: auto;
+  padding-bottom: auto;
   text-align: center;
   display: inline-block;
-  font-size: 14px;
-  width: 20px;
+  font-size: 20px;
+  width: auto;
   border-radius: 4px;
 }

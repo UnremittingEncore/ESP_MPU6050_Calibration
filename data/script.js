@@ -84,11 +84,11 @@ if (!!window.EventSource) {
     document.getElementById("gyroY").innerHTML = obj.gyroY;
     document.getElementById("gyroZ").innerHTML = obj.gyroZ;
 
-    //Change cube rotation after receiving the readinds
-    cube.rotation.x = obj.gyroY;
-    cube.rotation.z = obj.gyroX;
-    cube.rotation.y = obj.gyroZ;
-    renderer.render(scene, camera);
+    //Change cube rotation after receiving the readings
+    // cube.rotation.x = obj.gyroY;
+    // cube.rotation.z = obj.gyroX;
+    // cube.rotation.y = obj.gyroZ;
+    // renderer.render(scene, camera);
   }, false);
 
   source.addEventListener('kalman_readings', function(e) {
@@ -96,7 +96,16 @@ if (!!window.EventSource) {
     var obj = JSON.parse(e.data);
     document.getElementById("kalPitch").innerHTML = obj.kalPitch;
     document.getElementById("kalRoll").innerHTML = obj.kalRoll;
+    document.getElementById("kalYaw").innerHTML = obj.kalYaw;
 
+    //Change cube rotation after receiving the readings
+    // cube.rotation.x = obj.kalPitch;
+    // cube.rotation.y = obj.kalRoll;
+    // cube.rotation.z = obj.kalYaw;
+    cube.rotation.x = obj.kalRoll;
+    cube.rotation.y = obj.kalYaw;
+    cube.rotation.z = obj.kalPitch;
+    renderer.render(scene, camera);
   }, false);
 
   source.addEventListener('accelerometer_readings', function(e) {

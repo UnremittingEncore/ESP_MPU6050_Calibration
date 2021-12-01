@@ -20,7 +20,7 @@
     
 <body>
   <div class="topnav">
-    <h1><i class="fas fa-tachometer-alt"></i> MPU6050 <i class="fas fa-tachometer-alt"></i></h1>
+    <h1><i class="fas fa-tachometer-alt"></i> IMU Readings <i class="fas fa-tachometer-alt"></i></h1>
   </div>
   <div class="content">
     <div class="cards">
@@ -38,18 +38,18 @@
       </div>
       <div class="card">
         <p class="card-title">KALMAN</p>
-        <p><span class="reading">Kal Pitch: <span id="kalPitch"></span> !@</span></p>
-        <p><span class="reading">Kal Roll: <span id="kalRoll"></span> !@</span></p>
-        <p class="card-title"> Calibrate </p>
-        <button id="reset" onclick="resetPosition(this)">RESET POSITION</button>
-        <button id="resetX" onclick="resetPosition(this)">X</button>
-        <button id="resetY" onclick="resetPosition(this)">Y</button>
-        <button id="resetZ" onclick="resetPosition(this)">Z</button>
+        <p><span class="reading">Pitch: <span id="kalPitch"></span> rad</span></p>
+        <p><span class="reading">Roll: <span id="kalRoll"></span> rad</span></p>
+        <p><span class="reading">Yaw: <span id="kalYaw"></span> rad</span></p>
       </div>
     </div>
+    <button id="reset" onclick="resetPosition(this)">Calibrate Gyro</button>
+    <button id="resetX" onclick="resetPosition(this)">X</button>
+    <button id="resetY" onclick="resetPosition(this)">Y</button>
+    <button id="resetZ" onclick="resetPosition(this)">Z</button>
     <div class="cube-content">
       <div id="3Dcube">
-        </div>
+      </div>
     </div>
   </div>
 <script src="script.js"></script>
