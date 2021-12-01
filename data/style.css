@@ -67,16 +67,3 @@ body {
   font-size: 20px; width: auto;
   border-radius: 4px;
 }
-#resetX, #resetY, #resetZ{
-  border: none;
-  color: teal;
-  font-family: Courier New;
-  background-color: lightcyan;
-  padding-top: auto;
-  padding-bottom: auto;
-  text-align: center;
-  display: inline-block;
-  font-size: 20px;
-  width: auto;
-  border-radius: 4px;
-}
