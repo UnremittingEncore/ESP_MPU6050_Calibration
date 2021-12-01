@@ -11,6 +11,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include <Wire.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <Adafruit_MPU6050.h>
@@ -23,13 +24,18 @@
 
 KalmanFilter kalmanX(0.001, 0.003, 0.03);
 KalmanFilter kalmanY(0.001, 0.003, 0.03);
+KalmanFilter kalmanZ(0.001, 0.003, 0.03);
 
 float accPitch = 0;
 float accRoll = 0;
+float accYaw = 0;
 
 float kalPitch = 0;
 float kalRoll = 0;
+float kalYaw = 0;
 
+float M_P1 = 3.141592; // Also defined in math.h 
+const float alpha = 0.6;
 //----------------------------------
 
 // Replace with your network credentials
@@ -49,9 +55,9 @@ JSONVar readings;
 unsigned long lastTime = 0;  
 unsigned long lastTimeKal = 0;
 unsigned long lastTimeAcc = 0;
-unsigned long gyroDelay = 10;
-unsigned long kalmanDelay = 1000;
-unsigned long accelerometerDelay = 200;
+unsigned long gyroDelay = 80;
+unsigned long kalmanDelay = 80;
+unsigned long accelerometerDelay = 80;
 
 // Create a sensor object
 Adafruit_MPU6050 mpu;
@@ -63,7 +69,7 @@ float accX, accY, accZ;
 float temperature;
 
 //Gyroscope sensor deviation
-float gyroXerror = 0.07;
+float gyroXerror = 0.05;
 float gyroYerror = 0.03;
 float gyroZerror = 0.01;
 
@@ -129,10 +135,10 @@ String getGyroReadings(){
 
 String getAccReadings() {
   mpu.getEvent(&a, &g, &temp);
-  // Get current acceleration values in g-force units
-  accX = a.acceleration.x/9.8;
-  accY = a.acceleration.y/9.8;
-  accZ = a.acceleration.z/9.8;
+  // Get current acceleration values in g-force units and removing fluctuations with a low pass filter  
+  accX = (a.acceleration.x*alpha+(a.acceleration.x*(1.0-alpha)))/9.8;
+  accY = (a.acceleration.y*alpha+(a.acceleration.y*(1.0-alpha)))/9.8;
+  accZ = (a.acceleration.z*alpha+(a.acceleration.z*(1.0-alpha)))/9.8;
   readings["accX"] = String(accX);
   readings["accY"] = String(accY);
   readings["accZ"] = String(accZ);
@@ -145,10 +151,10 @@ String getKalReadings() {
   
   mpu.getEvent(&a, &g, &temp);
   
-  // Get current acceleration values  
-  accX = a.acceleration.x;
-  accY = a.acceleration.y;
-  accZ = a.acceleration.z;
+  // Get current acceleration values and removing fluctuations with a low pass filter  
+  accX = (a.acceleration.x*alpha+(a.acceleration.x*(1.0-alpha)))/9.8;
+  accY = (a.acceleration.y*alpha+(a.acceleration.y*(1.0-alpha)))/9.8;
+  accZ = (a.acceleration.z*alpha+(a.acceleration.z*(1.0-alpha)))/9.8;
   
   // Gyro readings
   float gyroX_temp = g.gyro.x;
@@ -166,16 +172,22 @@ String getKalReadings() {
     gyroZ += gyroZ_temp/90.00;
   }
   
-  // Calculate Pitch & Roll from accelerometer (deg)
-  accPitch = -(atan2(accX, sqrt(accY*accY + accZ*accZ))*180.0)/M_PI;
-  accRoll  = (atan2(accY, accZ)*180.0)/M_PI;
+  // Calculate Pitch, Roll and Yaw from accelerometer (deg)
+  accPitch = (atan2(accX, sqrt(accY*accY + accZ*accZ))*180.0)/M_P1;
+  accRoll  = (atan2(accY, sqrt(accX*accX + accZ*accZ))*180.0)/M_P1;
+  accYaw  = (atan2(sqrt(accX*accX + accZ*accZ), accZ)*180.0)/M_P1;
 
   // Kalman filter
-  kalPitch = kalmanY.update(accPitch, gyroY);
-  kalRoll = kalmanX.update(accRoll, gyroX);
-
+//  kalPitch = kalmanY.update(accPitch/1634, gyroY);
+//  kalRoll = kalmanX.update(accRoll/1634, gyroX);
+//  kalYaw = kalmanZ.update(accYaw/1634, gyroZ);
+  kalPitch = accPitch*gyroZ;
+  kalRoll = accY*gyroY;
+  kalYaw = accYaw*gyroZ/(2.0);
+  
   readings["kalPitch"] = String(kalPitch);
   readings["kalRoll"] = String(kalRoll);
+  readings["kalYaw"] = String(kalYaw);
   String kalString = JSON.stringify (readings);
   return kalString;
 }
